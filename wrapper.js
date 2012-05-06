@@ -1,6 +1,10 @@
 // Rewrite of model.refList to better accomodate common usage where one wants to simply convert an object full of objects to a loopable list (array)
 get('*', function( page, model, params, next ) {
 		
+		// counter id used to keep temporary lists of ids separate
+		var 
+			i = 1;
+		
 		// Save the old version of refList for internal usage here and in case one would still want to use it later
 		model.oldRefList = model.refList;
 		
@@ -10,7 +14,7 @@ get('*', function( page, model, params, next ) {
 		model.refList = function ( new_path, path, ref_path ) {
 				
 				var
-					ref_path = ref_path || '_make_list_temp'
+					ref_path = ref_path || '_temp_list_' + i, 
 					path = path || new_path;
 				
 				// new_path was omitted, then use path as base and simply prefix it with _
@@ -21,10 +25,10 @@ get('*', function( page, model, params, next ) {
 				}
 				
 				// If ref_path was omitted, create a temporary list containing all ids of the path
-				if( ref_path === '_make_list_temp' ) {
+				if( ref_path === '_temp_list_' + i ) {
 					
 					model.set( 
-							'_make_list_temp', 
+							'_temp_list_' + i, 
 							_.map( 
 								model.get( path ), 
 								function ( value, key, list ) { 
@@ -34,6 +38,9 @@ get('*', function( page, model, params, next ) {
 								}
 							) 
 						);
+					
+					// Add to counter to avoid collision with next temp list
+					i++;
 					
 				}
 				
